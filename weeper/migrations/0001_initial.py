@@ -15,6 +15,8 @@ class Migration(SchemaMigration):
             ('name', self.gf('django.db.models.fields.CharField')(max_length=255, null=True, blank=True)),
             ('status', self.gf('django.db.models.fields.PositiveSmallIntegerField')(default=1)),
             ('deadline', self.gf('django.db.models.fields.DateTimeField')()),
+            ('date_send', self.gf('django.db.models.fields.DateTimeField')(null=True, blank=True)),
+            ('task_url', self.gf('django.db.models.fields.URLField')(max_length=200)),
             ('first_email_text', self.gf('django.db.models.fields.TextField')()),
             ('reminders_text', self.gf('django.db.models.fields.TextField')(null=True, blank=True)),
             ('day_before_deadline_text', self.gf('django.db.models.fields.TextField')(null=True, blank=True)),
@@ -34,13 +36,18 @@ class Migration(SchemaMigration):
         # Adding model 'Task'
         db.create_table(u'weeper_task', (
             (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
+            ('user', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['action_user.User'])),
             ('date_add', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, blank=True)),
             ('is_complete', self.gf('django.db.models.fields.BooleanField')(default=False)),
             ('date_complete', self.gf('django.db.models.fields.DateTimeField')(null=True, blank=True)),
-            ('key', self.gf('django.db.models.fields.CharField')(max_length=32)),
+            ('hash', self.gf('django.db.models.fields.CharField')(unique=True, max_length=32)),
             ('task_delivery', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['weeper.TaskDelivery'])),
-            ('email', self.gf('django.db.models.fields.TextField')()),
             ('deadline', self.gf('django.db.models.fields.DateTimeField')()),
+            ('first_email_text', self.gf('django.db.models.fields.TextField')()),
+            ('reminders_text', self.gf('django.db.models.fields.TextField')()),
+            ('day_before_deadline_text', self.gf('django.db.models.fields.TextField')()),
+            ('day_deadline_text', self.gf('django.db.models.fields.TextField')()),
+            ('after_deadline_text', self.gf('django.db.models.fields.TextField')()),
         ))
         db.send_create_signal(u'weeper', ['Task'])
 
@@ -99,19 +106,25 @@ class Migration(SchemaMigration):
         },
         u'weeper.task': {
             'Meta': {'object_name': 'Task'},
+            'after_deadline_text': ('django.db.models.fields.TextField', [], {}),
             'date_add': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
             'date_complete': ('django.db.models.fields.DateTimeField', [], {'null': 'True', 'blank': 'True'}),
+            'day_before_deadline_text': ('django.db.models.fields.TextField', [], {}),
+            'day_deadline_text': ('django.db.models.fields.TextField', [], {}),
             'deadline': ('django.db.models.fields.DateTimeField', [], {}),
-            'email': ('django.db.models.fields.TextField', [], {}),
+            'first_email_text': ('django.db.models.fields.TextField', [], {}),
+            'hash': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '32'}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'is_complete': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
-            'key': ('django.db.models.fields.CharField', [], {'max_length': '32'}),
-            'task_delivery': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['weeper.TaskDelivery']"})
+            'reminders_text': ('django.db.models.fields.TextField', [], {}),
+            'task_delivery': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['weeper.TaskDelivery']"}),
+            'user': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['action_user.User']"})
         },
         u'weeper.taskdelivery': {
             'Meta': {'object_name': 'TaskDelivery'},
             'after_deadline_text': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
             'date_add': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
+            'date_send': ('django.db.models.fields.DateTimeField', [], {'null': 'True', 'blank': 'True'}),
             'day_before_deadline_text': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
             'day_deadline_text': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
             'deadline': ('django.db.models.fields.DateTimeField', [], {}),
@@ -120,6 +133,7 @@ class Migration(SchemaMigration):
             'name': ('django.db.models.fields.CharField', [], {'max_length': '255', 'null': 'True', 'blank': 'True'}),
             'reminders_text': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
             'status': ('django.db.models.fields.PositiveSmallIntegerField', [], {'default': '1'}),
+            'task_url': ('django.db.models.fields.URLField', [], {'max_length': '200'}),
             'users': ('django.db.models.fields.related.ManyToManyField', [], {'to': u"orm['action_user.User']", 'symmetrical': 'False'})
         }
     }

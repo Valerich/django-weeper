@@ -11,7 +11,7 @@ class TaskDeliveryAdmin(admin.ModelAdmin):
 
 
 class TaskAdmin(admin.ModelAdmin):
-    list_display = ['key', 'is_complete', 'task_delivery']
+    list_display = ['hash', 'is_complete', 'task_delivery']
     list_filter = ['task_delivery', 'date_add', 'date_complete']
 
 
