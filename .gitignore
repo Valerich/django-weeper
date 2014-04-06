@@ -1,0 +1,17 @@
+
+*.class
+*.log
+*.log~
+*.pyc
+*.pyo
+*.py~
+*.sh~
+*.txt~
+
+# Vim+rope stuff. Please, don't remove this without straight reasons.
+*.swl
+*.swm
+*.swn
+*.swo
+*.swp
+.ropeproject
