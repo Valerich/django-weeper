@@ -3,16 +3,20 @@ import hashlib
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.contrib.sites.models import Site
 from django.db import models
 from django.template import Template, Context
 from django.utils.translation import ugettext_lazy as _
+
+from mailer import send_mail
 
 
 TASK_DELIVERY_STATUSES = (
     (1, _('new')),
     (2, _('ready for distribution')),
     (3, _('sent')),
-    (4, _('closed'))
+    (4, _('closed')),
+    (100, _('lock')),
 )
 
 
@@ -52,9 +56,17 @@ class TaskDelivery(models.Model):
 
     def send(self):
         if self.status == 2:
+            self.status = 100
+            self.save()
             for user in self.users.all():
                 task = Task(user=user, task_delivery=self, deadline=self.deadline)
                 task.save()
+                send_mail(
+                    getattr(settings, 'WEEPER_EMAIL_SUBJECT', u'Задача'),
+                    task.first_email_text,
+                    getattr(settings, 'WEEPER_FROM_EMAIL',
+                            u'robot@{}'.format(Site.objects.get_current().domain)),
+                    [task.get_email(), ])
             self.status = 3
             self.save()
 
