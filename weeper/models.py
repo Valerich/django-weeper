@@ -8,7 +8,9 @@ from django.db import models
 from django.template import Template, Context
 from django.utils.translation import ugettext_lazy as _
 
-from mailer import send_mail
+from mailer.models import Message
+
+from .utils import send_mail
 
 
 TASK_DELIVERY_STATUSES = (
@@ -61,12 +63,14 @@ class TaskDelivery(models.Model):
             for user in self.users.all():
                 task = Task(user=user, task_delivery=self, deadline=self.deadline)
                 task.save()
-                send_mail(
+                mails = send_mail(
                     getattr(settings, 'WEEPER_EMAIL_SUBJECT', u'Задача'),
                     task.first_email_text,
                     getattr(settings, 'WEEPER_FROM_EMAIL',
                             u'robot@{}'.format(Site.objects.get_current().domain)),
                     [task.get_email(), ])
+                for mail in mails:
+                    task.mails.add(mail)
             self.status = 3
             self.save()
 
@@ -85,6 +89,8 @@ class Task(models.Model):
     day_before_deadline_text = models.TextField(_('day before deadline text'))
     day_deadline_text = models.TextField(_('day deadline text'))
     after_deadline_text = models.TextField(_('after deadline text'))
+
+    mails = models.ManyToManyField(Message, verbose_name=_('mails'), blank=True, null=True)
 
     class Meta:
         verbose_name = _('Task')
