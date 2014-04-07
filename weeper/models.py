@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import datetime
 import hashlib
 
 from django.conf import settings
@@ -63,14 +64,7 @@ class TaskDelivery(models.Model):
             for user in self.users.all():
                 task = Task(user=user, task_delivery=self, deadline=self.deadline)
                 task.save()
-                mails = send_mail(
-                    getattr(settings, 'WEEPER_EMAIL_SUBJECT', u'Задача'),
-                    task.first_email_text,
-                    getattr(settings, 'WEEPER_FROM_EMAIL',
-                            u'robot@{}'.format(Site.objects.get_current().domain)),
-                    [task.get_email(), ])
-                for mail in mails:
-                    task.mails.add(mail)
+                task.send()
             self.status = 3
             self.save()
 
@@ -91,10 +85,56 @@ class Task(models.Model):
     after_deadline_text = models.TextField(_('after deadline text'))
 
     mails = models.ManyToManyField(Message, verbose_name=_('mails'), blank=True, null=True)
+    reminders_date = models.DateTimeField(_('reminders_date'), blank=True, null=True)
+
+    send_first_email = models.BooleanField(_('send first email'), default=False)
+    send_reminders = models.BooleanField(_('send reminders'), default=False)
+    send_day_before_deadline = models.BooleanField(_('send day before deadline'), default=False)
+    send_day_deadline = models.BooleanField(_('send day deadline'), default=False)
 
     class Meta:
         verbose_name = _('Task')
         verbose_name_plural = _('Tasks')
+
+    def send(self, email_type='first'):
+        types = {
+            'first': (
+                getattr(settings, 'WEEPER_EMAIL_SUBJECT', u'Задача'),
+                self.first_email_text,
+                'send_first_email'),
+            'reminder': (
+                getattr(settings, 'WEEPER_REMINDER_EMAIL_SUBJECT', u'Напоминание'),
+                self.reminders_text,
+                'send_reminders'),
+            'day_before_deadline': (
+                getattr(settings, 'WEEPER_DAY_BEFORE_DEADLINE_EMAIL_SUBJECT', u'Напоминание'),
+                self.day_before_deadline_text,
+                'send_day_before_deadline'),
+            'day_deadline': (
+                getattr(settings, 'WEEPER_DAY_DEADLINE_EMAIL_SUBJECT', u'Напоминание'),
+                self.day_deadline_text,
+                'send_day_deadline'),
+            'after_deadline': (
+                getattr(settings, 'WEEPER_AFTER_DEADLINE_EMAIL_SUBJECT', u'Напоминание'),
+                self.after_deadline_text),
+        }
+        try:
+            email_data = types[email_type]
+            mails = send_mail(
+                email_data[0],
+                email_data[1],
+                getattr(settings, 'WEEPER_FROM_EMAIL',
+                        u'robot@{}'.format(Site.objects.get_current().domain)),
+                [self.get_email(), ])
+            for mail in mails:
+                self.mails.add(mail)
+            try:
+                setattr(self, email_data[2], True)
+                self.save()
+            except IndexError:
+                pass
+        except KeyError:
+            pass
 
     def get_username(self):
         username = u''
@@ -158,4 +198,10 @@ class Task(models.Model):
         if not self.id:
             self.hash = self.generate_hash()
             self.set_email_text()
+        date_add = self.date_add if self.date_add else datetime.datetime.now()
+        period = self.deadline - date_add
+        if period > datetime.timedelta(days=4):
+            self.reminders_date = self.deadline - datetime.timedelta(days=period.days/2)
+        else:
+            self.reminders_date = None
         super(Task, self).save(*args, **kwargs)

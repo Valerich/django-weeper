@@ -48,8 +48,21 @@ class Migration(SchemaMigration):
             ('day_before_deadline_text', self.gf('django.db.models.fields.TextField')()),
             ('day_deadline_text', self.gf('django.db.models.fields.TextField')()),
             ('after_deadline_text', self.gf('django.db.models.fields.TextField')()),
+            ('reminders_date', self.gf('django.db.models.fields.DateTimeField')(null=True, blank=True)),
+            ('send_first_email', self.gf('django.db.models.fields.BooleanField')(default=False)),
+            ('send_reminders', self.gf('django.db.models.fields.BooleanField')(default=False)),
+            ('send_day_before_deadline', self.gf('django.db.models.fields.BooleanField')(default=False)),
+            ('send_day_deadline', self.gf('django.db.models.fields.BooleanField')(default=False)),
         ))
         db.send_create_signal(u'weeper', ['Task'])
+
+        # Adding M2M table for field mails on 'Task'
+        db.create_table(u'weeper_task_mails', (
+            ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True)),
+            ('task', models.ForeignKey(orm[u'weeper.task'], null=False)),
+            ('message', models.ForeignKey(orm[u'mailer.message'], null=False))
+        ))
+        db.create_unique(u'weeper_task_mails', ['task_id', 'message_id'])
 
 
     def backwards(self, orm):
@@ -61,6 +74,9 @@ class Migration(SchemaMigration):
 
         # Deleting model 'Task'
         db.delete_table(u'weeper_task')
+
+        # Removing M2M table for field mails on 'Task'
+        db.delete_table('weeper_task_mails')
 
 
     models = {
@@ -104,6 +120,16 @@ class Migration(SchemaMigration):
             'model': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
             'name': ('django.db.models.fields.CharField', [], {'max_length': '100'})
         },
+        u'mailer.message': {
+            'Meta': {'object_name': 'Message'},
+            'from_address': ('django.db.models.fields.CharField', [], {'max_length': '50'}),
+            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'message_body': ('django.db.models.fields.TextField', [], {}),
+            'priority': ('django.db.models.fields.CharField', [], {'default': "'2'", 'max_length': '1'}),
+            'subject': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
+            'to_address': ('django.db.models.fields.CharField', [], {'max_length': '50'}),
+            'when_added': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime.now'})
+        },
         u'weeper.task': {
             'Meta': {'object_name': 'Task'},
             'after_deadline_text': ('django.db.models.fields.TextField', [], {}),
@@ -116,7 +142,13 @@ class Migration(SchemaMigration):
             'hash': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '32'}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'is_complete': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
+            'mails': ('django.db.models.fields.related.ManyToManyField', [], {'symmetrical': 'False', 'to': u"orm['mailer.Message']", 'null': 'True', 'blank': 'True'}),
+            'reminders_date': ('django.db.models.fields.DateTimeField', [], {'null': 'True', 'blank': 'True'}),
             'reminders_text': ('django.db.models.fields.TextField', [], {}),
+            'send_day_before_deadline': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
+            'send_day_deadline': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
+            'send_first_email': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
+            'send_reminders': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
             'task_delivery': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['weeper.TaskDelivery']"}),
             'user': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['action_user.User']"})
         },
