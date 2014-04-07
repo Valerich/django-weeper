@@ -16,22 +16,23 @@ class Command(BaseCommand):
         # Напоминание
         for task in Task.objects.filter(is_complete=False,
                                         send_reminders=False,
-                                        reminders_date__lte=datetime.datetime.now()):
+                                        reminders_date__contains=datetime.date.today()):
             task.send(email_type='reminder')
 
         # За день до дедлайна
+        day_before_deadline = datetime.date.today() + datetime.timedelta(days=1)
         for task in Task.objects.filter(is_complete=False,
                                         send_day_before_deadline=False,
-                                        deadline__lte=datetime.datetime.now() + datetime.timedelta(days=1)):
+                                        deadline__contains=day_before_deadline):
             task.send(email_type='day_before_deadline')
 
         # В день дедлайна
         for task in Task.objects.filter(is_complete=False,
                                         send_day_deadline=False,
-                                        deadline__lte=datetime.datetime.now()):
+                                        deadline__contains=datetime.date.today()):
             task.send(email_type='day_deadline')
 
         # После дедлайна
         for task in Task.objects.filter(is_complete=False,
-                                        deadline__lt=datetime.datetime.now()):
+                                        deadline__lt=datetime.date.today()):
             task.send(email_type='after_deadline')
