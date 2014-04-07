@@ -1,10 +1,25 @@
 # -*- coding: utf-8 -*-
 import datetime
 
+from django.core.urlresolvers import reverse
 from django.views.generic import View, RedirectView
-from django.http import HttpResponse, Http404
+from django.http import HttpResponse, Http404, HttpResponseRedirect
 
-from .models import Task
+from .models import Task, TaskDelivery
+
+
+class TaskDeliverySend(View):
+
+    def get(self, request, pk, *args, **kwargs):
+        if request.user.is_superuser:
+            try:
+                td = TaskDelivery.objects.get(pk=pk)
+                td.send()
+                return HttpResponseRedirect(reverse('admin:weeper_taskdelivery_changelist'))
+            except TaskDelivery.DoesNotExist:
+                raise Http404
+        else:
+            return HttpResponse(status_code=500)
 
 
 class TaskComplete(View):
