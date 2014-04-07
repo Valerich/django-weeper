@@ -197,7 +197,7 @@ class Task(models.Model):
         context = Context({
             'username': self.get_username(),
             'email': self.get_email(),
-            'deadline': unicode(self.deadline),
+            'deadline': self.deadline,
             'link': self.task_delivery.task_url,
             'redirect_link': self.get_redirect_link(),
             'hash': self.hash})
