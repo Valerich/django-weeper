@@ -13,6 +13,7 @@ class TaskDeliveryAdmin(admin.ModelAdmin):
 class TaskAdmin(admin.ModelAdmin):
     list_display = ['hash', 'is_complete', 'task_delivery']
     list_filter = ['task_delivery', 'date_add', 'date_complete']
+    raw_id_fields = ['user', 'task_delivery', 'mails', ]
 
 
 MODELS = {

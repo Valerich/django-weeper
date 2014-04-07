@@ -38,19 +38,19 @@ class TaskDelivery(models.Model):
 
     first_email_text = models.TextField(
         _('first email text'),
-        help_text="use {{ username }}, {{ email }}, {{ deadline }}, {{ redirect_link }}, {{ link }}, {{ hash }}")
+        help_text=_("use {{ username }}, {{ email }}, {{ deadline }}, {{ redirect_link }}, {{ link }}, {{ hash }}"))
     reminders_text = models.TextField(
         _('reminders text'), blank=True, null=True,
-        help_text="use {{ username }}, {{ email }}, {{ deadline }}, {{ redirect_link }}, {{ link }}, {{ hash }}")
+        help_text=_("use {{ username }}, {{ email }}, {{ deadline }}, {{ redirect_link }}, {{ link }}, {{ hash }}"))
     day_before_deadline_text = models.TextField(
         _('day before deadline text'), blank=True, null=True,
-        help_text="use {{ username }}, {{ email }}, {{ deadline }}, {{ redirect_link }}, {{ link }}, {{ hash }}")
+        help_text=_("use {{ username }}, {{ email }}, {{ deadline }}, {{ redirect_link }}, {{ link }}, {{ hash }}"))
     day_deadline_text = models.TextField(
         _('day deadline text'), blank=True, null=True,
-        help_text="use {{ username }}, {{ email }}, {{ deadline }}, {{ redirect_link }}, {{ link }}, {{ hash }}")
+        help_text=_("use {{ username }}, {{ email }}, {{ deadline }}, {{ redirect_link }}, {{ link }}, {{ hash }}"))
     after_deadline_text = models.TextField(
         _('after deadline text'), blank=True, null=True,
-        help_text="use {{ username }}, {{ email }}, {{ deadline }}, {{ redirect_link }}, {{ link }}, {{ hash }}")
+        help_text=_("use {{ username }}, {{ email }}, {{ deadline }}, {{ redirect_link }}, {{ link }}, {{ hash }}"))
 
     class Meta:
         verbose_name = _('TaskDelivery')
