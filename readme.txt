@@ -1,3 +1,5 @@
+python manage.py migrate weeper
+
 settings.py
 
 INSTALLED_APPS = (
