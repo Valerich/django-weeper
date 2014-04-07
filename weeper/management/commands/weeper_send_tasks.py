@@ -35,4 +35,5 @@ class Command(BaseCommand):
         # После дедлайна
         for task in Task.objects.filter(is_complete=False,
                                         deadline__lt=datetime.date.today()):
-            task.send(email_type='after_deadline')
+            if task.date_add.date() != task.deadline.date():
+                task.send(email_type='after_deadline')

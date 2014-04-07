@@ -5,6 +5,7 @@ import hashlib
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.sites.models import Site
+from django.core.urlresolvers import reverse
 from django.db import models
 from django.template import Template, Context
 from django.utils.translation import ugettext_lazy as _
@@ -37,19 +38,19 @@ class TaskDelivery(models.Model):
 
     first_email_text = models.TextField(
         _('first email text'),
-        help_text="use {{ username }}, {{ email }}, {{ deadline }}, {{ link }}, {{ hash }}")
+        help_text="use {{ username }}, {{ email }}, {{ deadline }}, {{ redirect_link }}, {{ link }}, {{ hash }}")
     reminders_text = models.TextField(
         _('reminders text'), blank=True, null=True,
-        help_text="use {{ username }}, {{ email }}, {{ deadline }}, {{ link }}, {{ hash }}")
+        help_text="use {{ username }}, {{ email }}, {{ deadline }}, {{ redirect_link }}, {{ link }}, {{ hash }}")
     day_before_deadline_text = models.TextField(
         _('day before deadline text'), blank=True, null=True,
-        help_text="use {{ username }}, {{ email }}, {{ deadline }}, {{ link }}, {{ hash }}")
+        help_text="use {{ username }}, {{ email }}, {{ deadline }}, {{ redirect_link }}, {{ link }}, {{ hash }}")
     day_deadline_text = models.TextField(
         _('day deadline text'), blank=True, null=True,
-        help_text="use {{ username }}, {{ email }}, {{ deadline }}, {{ link }}, {{ hash }}")
+        help_text="use {{ username }}, {{ email }}, {{ deadline }}, {{ redirect_link }}, {{ link }}, {{ hash }}")
     after_deadline_text = models.TextField(
         _('after deadline text'), blank=True, null=True,
-        help_text="use {{ username }}, {{ email }}, {{ deadline }}, {{ link }}, {{ hash }}")
+        help_text="use {{ username }}, {{ email }}, {{ deadline }}, {{ redirect_link }}, {{ link }}, {{ hash }}")
 
     class Meta:
         verbose_name = _('TaskDelivery')
@@ -167,6 +168,11 @@ class Task(models.Model):
         else:
             return getattr(self.user, 'email', None)
 
+    def get_redirect_link(self):
+        return u'http://{}{}'.format(
+            Site.objects.get_current().domain,
+            reverse("weeper:go_to_task_url", kwargs={'task_hash': self.hash}))
+
     def generate_hash(self):
         s = u'{}{}{}'.format(self.task_delivery.id, self.get_email(), self.user.id)
         return hashlib.md5(s).hexdigest()
@@ -182,6 +188,7 @@ class Task(models.Model):
             'email': self.get_email(),
             'deadline': unicode(self.deadline),
             'link': self.task_delivery.task_url,
+            'redirect_link': self.get_redirect_link(),
             'hash': self.hash})
         first_email_text = None
         for etf in etfs:
