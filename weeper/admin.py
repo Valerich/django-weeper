@@ -9,7 +9,8 @@ class TaskDeliveryAdmin(admin.ModelAdmin):
                     'name',
                     'status',
                     'deadline',
-                    'complete_by_redirect', ]
+                    'complete_by_redirect',
+                    'send_tag']
     list_filter = ['status', 'date_add', 'deadline']
     filter_horizontal = ('users',)
 

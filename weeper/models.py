@@ -59,6 +59,16 @@ class TaskDelivery(models.Model):
     def __unicode__(self):
         return u'{} {}'.format(self.id, self.name if self.name else u'')
 
+    def send_tag(self):
+        if self.status == 2:
+            return u'''<a href="{}">{}</a>'''.format(
+                reverse("weeper:task_delivery_send" , kwargs={'pk': self.pk}),
+                _('Send'))
+        else:
+            return u''
+    send_tag.short_description = _('Actions')
+    send_tag.allow_tags = True
+
     def send(self):
         if self.status == 2:
             self.status = 100
