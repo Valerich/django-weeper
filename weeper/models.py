@@ -33,6 +33,7 @@ class TaskDelivery(models.Model):
     deadline = models.DateTimeField(_('deadline'))
     date_send = models.DateTimeField(_('date send'), blank=True, null=True)
     task_url = models.URLField(_('task url'))
+    complete_by_redirect = models.BooleanField(_('complete by redirect'), default=False)
 
     first_email_text = models.TextField(
         _('first email text'),
