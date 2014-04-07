@@ -179,9 +179,10 @@ class Task(models.Model):
             return getattr(self.user, 'email', None)
 
     def get_redirect_link(self):
-        return u'http://{}{}'.format(
+        return u'http://{}{}?task_key={}'.format(
             Site.objects.get_current().domain,
-            reverse("weeper:go_to_task_url", kwargs={'task_hash': self.hash}))
+            reverse("weeper:go_to_task_url", kwargs={'task_hash': self.hash}),
+            self.hash)
 
     def generate_hash(self):
         s = u'{}{}{}'.format(self.task_delivery.id, self.get_email(), self.user.id)
