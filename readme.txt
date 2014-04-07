@@ -1,5 +1,6 @@
 python manage.py migrate weeper
 
+
 settings.py
 
 INSTALLED_APPS = (
@@ -34,3 +35,6 @@ cron
 55 13 * * * (/path/to/your/python /path/to/your/manage.py weeper_send_tasks)
 30 17 * * * (/path/to/your/python /path/to/your/manage.py weeper_send_tasks)
 0   1 * * * (/path/to/your/python /path/to/your/manage.py weeper_clear)
+
+
+Рассылка происходит при помощи django-mailer. Так что небоходимо его также настроить
