@@ -14,6 +14,12 @@ class TaskDeliveryAdmin(admin.ModelAdmin):
     list_filter = ['status', 'date_add', 'deadline']
     filter_horizontal = ('users',)
 
+    def get_readonly_fields(self, request, obj=None):
+        if obj:
+            return []
+        else:
+            return ['status', ]
+
 
 class TaskAdmin(admin.ModelAdmin):
     list_display = ['task_delivery',
