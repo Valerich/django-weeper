@@ -6,12 +6,21 @@ from setuptools import setup
 
 
 setup(
-    name     = 'django-weeper',
-    version  = '0.0.1',  # also update doc/conf.py:version
-    packages = ['weeper'],
+    name='django-weeper',
+    version='0.0.2',  # also update doc/conf.py:version
+    packages=[
+        'weeper',
+        "weeper.management",
+        "weeper.management.commands",
+        "weeper.migrations",
+    ],
     install_requires=[
         "django-mailer",
     ],
-    author       = 'Yakov Istomin',
-    author_email = 'yakov@istomin.me',
+    author='Yakov Istomin',
+    author_email='yakov@istomin.me',
+    package_dir={"weeper": "weeper"},
+    package_data={'weeper': [
+        'locale/ru/LC_MESSAGES/*',
+        'templates/admin/weeper/taskdelivery/*']},
 )
