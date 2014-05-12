@@ -50,4 +50,7 @@ class TaskRedirect(RedirectView):
         return super(TaskRedirect, self).dispatch(request, *args, **kwargs)
 
     def get_redirect_url(self, *args, **kwargs):
-        return self.task.task_delivery.task_url
+        url = u'{}{}'.format(
+            self.task.task_delivery.task_url,
+            u'?task_key={}'.format(self.task.hash) if not self.task.task_delivery.complete_by_redirect else u'')
+        return url

@@ -185,10 +185,9 @@ class Task(models.Model):
             return getattr(self.user, 'email', None)
 
     def get_redirect_link(self):
-        return u'http://{}{}?task_key={}'.format(
+        return u'http://{}{}'.format(
             Site.objects.get_current().domain,
-            reverse("weeper:go_to_task_url", kwargs={'task_hash': self.hash}),
-            self.hash)
+            reverse("weeper:go_to_task_url", kwargs={'task_hash': self.hash}))
 
     def generate_hash(self):
         s = u'{}{}{}'.format(self.task_delivery.id, self.get_email(), self.user.id)
@@ -196,15 +195,17 @@ class Task(models.Model):
 
     def set_email_text(self):
         etfs = ('first_email_text',
-               'reminders_text',
-               'day_before_deadline_text',
-               'day_deadline_text',
-               'after_deadline_text')
+                'reminders_text',
+                'day_before_deadline_text',
+                'day_deadline_text',
+                'after_deadline_text')
         context = Context({
             'username': self.get_username(),
             'email': self.get_email(),
             'deadline': self.deadline,
-            'link': self.task_delivery.task_url,
+            'link': u'{}{}'.format(
+                self.task_delivery.task_url,
+                u'?task_key={}'.format(self.hash) if not self.task_delivery.complete_by_redirect else u''),
             'redirect_link': self.get_redirect_link(),
             'hash': self.hash})
         first_email_text = None
