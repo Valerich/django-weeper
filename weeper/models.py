@@ -15,11 +15,17 @@ from mailer.models import Message
 from .utils import send_mail
 
 
-TASK_DELIVERY_STATUSES = (
+TASK_DELIVERY_CREATE_STATUSES = (
     (1, _('new')),
-    (2, _('ready for distribution')),
+    (2, _('ready for distribution'))
+)
+
+TASK_DELIVERY_UPDATE_STATUSES = TASK_DELIVERY_CREATE_STATUSES + (
     (3, _('sent')),
     (4, _('closed')),
+)
+
+TASK_DELIVERY_STATUSES = TASK_DELIVERY_UPDATE_STATUSES + (
     (100, _('lock')),
 )
 

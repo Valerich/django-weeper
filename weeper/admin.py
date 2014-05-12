@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from django.contrib import admin
 
+from .forms import TaskDeliveryAdminForm
 from .models import TaskDelivery, Task
 
 
@@ -13,13 +14,7 @@ class TaskDeliveryAdmin(admin.ModelAdmin):
                     'send_tag']
     list_filter = ['status', 'date_add', 'deadline']
     filter_horizontal = ('users',)
-
-    def get_readonly_fields(self, request, obj=None):
-        if obj:
-            return []
-        else:
-            return ['status', ]
-
+    form = TaskDeliveryAdminForm
 
 class TaskAdmin(admin.ModelAdmin):
     list_display = ['task_delivery',
