@@ -33,7 +33,7 @@ TASK_DELIVERY_STATUSES = TASK_DELIVERY_UPDATE_STATUSES + (
 class TaskDelivery(models.Model):
     date_add = models.DateTimeField(_('date add'), auto_now_add=True)
     name = models.CharField(_('name'), max_length=255, blank=True, null=True)
-    users = models.ManyToManyField(get_user_model(), verbose_name=_('users'))
+    users = models.ManyToManyField(settings.AUTH_USER_MODEL, verbose_name=_('users'))
     status = models.PositiveSmallIntegerField(_('status'),
                                               choices=TASK_DELIVERY_STATUSES,
                                               default=1)
