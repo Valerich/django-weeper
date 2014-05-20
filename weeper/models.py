@@ -6,7 +6,7 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.sites.models import Site
 from django.core.urlresolvers import reverse
-from django.db import models
+from django.db import models, IntegrityError
 from django.template import Template, Context
 from django.utils.translation import ugettext_lazy as _
 
@@ -80,11 +80,36 @@ class TaskDelivery(models.Model):
             self.status = 100
             self.save()
             for user in self.users.all():
-                task = Task(user=user, task_delivery=self, deadline=self.deadline)
-                task.save()
-                task.send()
+                self.create_task(user)
             self.status = 3
             self.save()
+
+    def check_tasks(self):
+        """Проверяем для всех ли пользователей созданы таски
+
+        Работает только для статуса 3 ("Отправлен")
+
+        Метод нужен для того, чтобы добавить таск для пользователя, которого добавили к рассылке уже
+        после рассылки. И удалить таски пользователей, которые исключены из рассылки
+        """
+
+        if self.status == 3:
+            task_users = {t.user: t for t in self.task_set.all()}
+            for user in self.users.all():
+                task = task_users.pop(user, None)
+                if not task:
+                    self.create_task(user)
+            self.task_set.filter(user__in=task_users.keys()).delete()
+
+    def create_task(self, user, send=True):
+        try:
+            task = Task(user=user, task_delivery=self, deadline=self.deadline)
+            task.save()
+            if send:
+                task.send()
+        except IntegrityError:
+            # Обрабатываем ситуацию, когда таск для пользователя данной task_delivery уже существует
+            pass
 
 
 class Task(models.Model):
@@ -113,6 +138,7 @@ class Task(models.Model):
     class Meta:
         verbose_name = _('Task')
         verbose_name_plural = _('Tasks')
+        unique_together = ('task_delivery', 'user')
 
     def send(self, email_type='first'):
         types = {
@@ -231,3 +257,11 @@ class Task(models.Model):
         else:
             self.reminders_date = None
         super(Task, self).save(*args, **kwargs)
+
+
+def task_delivery_users_changed(instance, action, pk_set, *args, **kwargs):
+    if getattr(settings, 'WEEPER_ALLOW_ADDING_USER_TO_SENT_TASK_DELIVERY', True):
+        if action == 'post_add':
+            instance.check_tasks()
+
+models.signals.m2m_changed.connect(task_delivery_users_changed, sender=TaskDelivery.users.through)

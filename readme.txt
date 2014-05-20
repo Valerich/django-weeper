@@ -19,6 +19,11 @@ WEEPER_USERNAME_FIELDS = ['first_name', 'last_name']
 WEEPER_USER_EMAIL_FIELD = 'email'
 WEEPER_CLEAR_PERIOD = 60
 
+# Разрешать добавлять пользователей к отправленной рассылке (и удалять)
+# если True, то при изменении TaskDelivery.users будут удалены/созданы дополнительные Task,
+# если False, то при изменение набора TaskDelivery.users отправленной рассылки ни на что не повлияет
+WEEPER_ALLOW_ADDING_USER_TO_SENT_TASK_DELIVERY = True
+
 
 urls.py
 
