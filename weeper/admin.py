@@ -16,6 +16,7 @@ class TaskDeliveryAdmin(admin.ModelAdmin):
     filter_horizontal = ('users',)
     form = TaskDeliveryAdminForm
 
+
 class TaskAdmin(admin.ModelAdmin):
     list_display = ['task_delivery',
                     'user',

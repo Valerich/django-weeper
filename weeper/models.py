@@ -15,6 +15,9 @@ from mailer.models import Message
 from .utils import send_mail
 
 
+email_text_help_text = _("use {{ username }}, {{ email }}, {{ deadline }}, {{ redirect_link }}, {{ link }}, {{ hash }}")
+
+
 TASK_DELIVERY_CREATE_STATUSES = (
     (1, _('new')),
     (2, _('ready for distribution'))
@@ -44,19 +47,19 @@ class TaskDelivery(models.Model):
 
     first_email_text = models.TextField(
         _('first email text'),
-        help_text=_("use {{ username }}, {{ email }}, {{ deadline }}, {{ redirect_link }}, {{ link }}, {{ hash }}"))
+        help_text=email_text_help_text)
     reminders_text = models.TextField(
         _('reminders text'), blank=True, null=True,
-        help_text=_("use {{ username }}, {{ email }}, {{ deadline }}, {{ redirect_link }}, {{ link }}, {{ hash }}"))
+        help_text=email_text_help_text)
     day_before_deadline_text = models.TextField(
         _('day before deadline text'), blank=True, null=True,
-        help_text=_("use {{ username }}, {{ email }}, {{ deadline }}, {{ redirect_link }}, {{ link }}, {{ hash }}"))
+        help_text=email_text_help_text)
     day_deadline_text = models.TextField(
         _('day deadline text'), blank=True, null=True,
-        help_text=_("use {{ username }}, {{ email }}, {{ deadline }}, {{ redirect_link }}, {{ link }}, {{ hash }}"))
+        help_text=email_text_help_text)
     after_deadline_text = models.TextField(
         _('after deadline text'), blank=True, null=True,
-        help_text=_("use {{ username }}, {{ email }}, {{ deadline }}, {{ redirect_link }}, {{ link }}, {{ hash }}"))
+        help_text=email_text_help_text)
 
     class Meta:
         verbose_name = _('TaskDelivery')
@@ -68,7 +71,7 @@ class TaskDelivery(models.Model):
     def send_tag(self):
         if self.status == 2:
             return u'''<a href="{}">{}</a>'''.format(
-                reverse("weeper:task_delivery_send" , kwargs={'pk': self.pk}),
+                reverse("weeper:task_delivery_send", kwargs={'pk': self.pk}),
                 _('Send'))
         else:
             return u''
