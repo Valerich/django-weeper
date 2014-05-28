@@ -9,15 +9,47 @@ INSTALLED_APPS = (
     ...
 )
 
-WEEPER_EMAIL_SUBJECT = u'Рассылка'
-WEEPER_REMINDER_EMAIL_SUBJECT = u'Напоминание'
-WEEPER_DAY_BEFORE_DEADLINE_EMAIL_SUBJECT = u'Напоминание'
-WEEPER_DAY_DEADLINE_EMAIL_SUBJECT = u'Напоминание'
-WEEPER_AFTER_DEADLINE_EMAIL_SUBJECT = u'Напоминание'
-WEEPER_FROM_EMAIL = 'robot@example.com'
-WEEPER_USERNAME_FIELDS = ['first_name', 'last_name']
-WEEPER_USER_EMAIL_FIELD = 'email'
-WEEPER_CLEAR_PERIOD = 60
+WEEPER_EMAIL_SUBJECT - Заголовок письма
+по умолчанию WEEPER_EMAIL_SUBJECT = u'Рассылка'
+
+WEEPER_REMINDER_EMAIL_SUBJECT - Заголовок письма с напоминанием
+по умолчанию WEEPER_REMINDER_EMAIL_SUBJECT = u'Напоминание'
+
+WEEPER_DAY_BEFORE_DEADLINE_EMAIL_SUBJECT - Заголовок письма с напоминанием за день до дедлайна
+по умолчанию WEEPER_DAY_BEFORE_DEADLINE_EMAIL_SUBJECT = u'Напоминание'
+
+WEEPER_DAY_DEADLINE_EMAIL_SUBJECT - Заголовок письма с напоминанием в день дедлайна
+по умолчанию WEEPER_DAY_DEADLINE_EMAIL_SUBJECT = u'Напоминание'
+
+WEEPER_AFTER_DEADLINE_EMAIL_SUBJECT - Заголовок письма с напоминанием после дедлайна
+по умолчанию WEEPER_AFTER_DEADLINE_EMAIL_SUBJECT = u'Напоминание'
+
+WEEPER_FROM_EMAIL - от кого рассылается письмо
+по умолчанию WEEPER_FROM_EMAIL = 'robot@' + Site.name
+
+WEEPER_USERNAME_FIELDS - поля из которых складывается имя получателя, для добавления в письмо (тег {{ username }})
+по умолчанию WEEPER_USERNAME_FIELDS = None
+если параметр не указан, то:
+1) если в модели User есть метод get_full_name - берем данные оттуда
+2) иначе из User.first_name
+3) иначе unicode(User)
+в WEEPER_USERNAME_FIELDS можно указывать как атрибуты модели так и методы
+например WEEPER_USERNAME_FIELDS = ['first_name', 'get_weeper_name']
+в этом случае:
+ class User(models.Model):
+     first_name = models.CharField(...)
+     ...
+     def get_weeper_name(self):
+         return u'а тут имя взятое из метода'
+
+ для u = User(first_name='Олег') в письме {{ username }} будет заменен на u'Олег а тут имя взятое из метода'
+
+WEEPER_USER_EMAIL_FIELD - поле модели user, в котором хранится email
+по умолчанию WEEPER_USER_EMAIL_FIELD = 'email'
+
+WEEPER_CLEAR_PERIOD - За какое время очищать данные випера
+по умолчанию WEEPER_CLEAR_PERIOD = 60
+Это означает, что записи будут удаляться через 60 дней после дедлайна
 
 # Разрешать добавлять пользователей к отправленной рассылке (и удалять)
 # если True, то при изменении TaskDelivery.users будут удалены/созданы дополнительные Task,
