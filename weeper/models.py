@@ -196,7 +196,11 @@ class Task(models.Model):
                 else:
                     if username:
                         username += u' '
-                    username += getattr(self.user, field)
+                    field = getattr(self.user, field)
+                    if hasattr(field, '__call__'):
+                        username += field()
+                    else:
+                        username += field
             if not error:
                 return username
         if hasattr(self.user, 'get_full_name'):
