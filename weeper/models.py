@@ -61,7 +61,7 @@ class TaskDelivery(models.Model):
         _('after deadline text'), blank=True, null=True,
         help_text=email_text_help_text)
     last_email_text = models.TextField(
-        _('lasr email text'), blank=True, null=True,
+        _('last email text'), blank=True, null=True,
         help_text=email_text_help_text)
 
 
