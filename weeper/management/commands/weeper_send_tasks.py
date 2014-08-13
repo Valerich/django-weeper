@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import datetime
 
+from django.conf import settings
 from django.core.management.base import BaseCommand
 
 from ...models import TaskDelivery, Task
@@ -12,6 +13,14 @@ class Command(BaseCommand):
         d_tasks = TaskDelivery.objects.filter(status=2)
         for d_task in d_tasks:
             d_task.send()
+
+        close_tasks_after = getattr(settings, 'WEEPER_CLOSE_TASKS_AFTER', 5)
+
+        if close_tasks_after:
+            last_day = datetime.date.today() + datetime.timedelta(days=close_tasks_after)
+            for task in Task.objects.filter(is_complete=False,
+                                            deadline__lte=last_day):
+                task.send(email_type='last')
 
         # Напоминание
         for task in Task.objects.filter(is_complete=False,

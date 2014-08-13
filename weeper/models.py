@@ -60,6 +60,10 @@ class TaskDelivery(models.Model):
     after_deadline_text = models.TextField(
         _('after deadline text'), blank=True, null=True,
         help_text=email_text_help_text)
+    last_email_text = models.TextField(
+        _('lasr email text'), blank=True, null=True,
+        help_text=email_text_help_text)
+
 
     class Meta:
         verbose_name = _('TaskDelivery')
@@ -129,6 +133,7 @@ class Task(models.Model):
     day_before_deadline_text = models.TextField(_('day before deadline text'))
     day_deadline_text = models.TextField(_('day deadline text'))
     after_deadline_text = models.TextField(_('after deadline text'))
+    last_email_text = models.TextField(_('last email text'))
 
     mails = models.ManyToManyField(Message, verbose_name=_('mails'), blank=True, null=True)
     reminders_date = models.DateTimeField(_('reminders_date'), blank=True, null=True)
@@ -137,6 +142,7 @@ class Task(models.Model):
     send_reminders = models.BooleanField(_('send reminders'), default=False)
     send_day_before_deadline = models.BooleanField(_('send day before deadline'), default=False)
     send_day_deadline = models.BooleanField(_('send day deadline'), default=False)
+    send_last_email = models.BooleanField(_('send last email'), default=False)
 
     class Meta:
         verbose_name = _('Task')
@@ -164,6 +170,10 @@ class Task(models.Model):
             'after_deadline': (
                 getattr(settings, 'WEEPER_AFTER_DEADLINE_EMAIL_SUBJECT', u'Напоминание'),
                 self.after_deadline_text),
+            'last': (
+                getattr(settings, 'WEEPER_LAST_EMAIL_SUBJECT', u'Задача не выполнена'),
+                self.last_email_text,
+                'send_last_email'),
         }
         try:
             email_data = types[email_type]
@@ -177,6 +187,8 @@ class Task(models.Model):
                 self.mails.add(mail)
             try:
                 setattr(self, email_data[2], True)
+                if email_data[2] == 'send_last_email':
+                    self.is_complete = True
                 self.save()
             except IndexError:
                 pass
@@ -231,7 +243,8 @@ class Task(models.Model):
                 'reminders_text',
                 'day_before_deadline_text',
                 'day_deadline_text',
-                'after_deadline_text')
+                'after_deadline_text',
+                'last_email_text')
         context = Context({
             'username': self.get_username(),
             'email': self.get_email(),
