@@ -117,6 +117,13 @@ class TaskDelivery(models.Model):
             # Обрабатываем ситуацию, когда таск для пользователя данной task_delivery уже существует
             pass
 
+    def close_task_by_user(self, user):
+        """
+        Закрытие задачи для пользователя.
+        """
+
+        self.task_set.filter(user=user).update(is_complete=True)
+
 
 class Task(models.Model):
     user = models.ForeignKey(get_user_model(), verbose_name=_('user'))
