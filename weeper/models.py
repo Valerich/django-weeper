@@ -64,7 +64,6 @@ class TaskDelivery(models.Model):
         _('last email text'), blank=True, null=True,
         help_text=email_text_help_text)
 
-
     class Meta:
         verbose_name = _('TaskDelivery')
         verbose_name_plural = _('TaskDeliverys')
@@ -101,7 +100,7 @@ class TaskDelivery(models.Model):
         """
 
         if self.status == 3:
-            task_users = {t.user: t for t in self.task_set.all()}
+            task_users = {t.user: t for t in self.task_set.all().select_related("user")}
             for user in self.users.all():
                 task = task_users.pop(user, None)
                 if not task:
@@ -281,7 +280,7 @@ class Task(models.Model):
 
 def task_delivery_users_changed(instance, action, pk_set, *args, **kwargs):
     if getattr(settings, 'WEEPER_ALLOW_ADDING_USER_TO_SENT_TASK_DELIVERY', True):
-        if action == 'post_add':
+        if action == 'post_add' or action == 'post_remove':
             instance.check_tasks()
 
 models.signals.m2m_changed.connect(task_delivery_users_changed, sender=TaskDelivery.users.through)
