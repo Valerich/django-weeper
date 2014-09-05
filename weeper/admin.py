@@ -15,20 +15,24 @@ class TaskDeliveryAdmin(admin.ModelAdmin):
     list_filter = ['status', 'date_add', 'deadline']
     filter_horizontal = ('users',)
     form = TaskDeliveryAdminForm
+    readonly_fields = ['date_send']
 
 
 class TaskAdmin(admin.ModelAdmin):
     list_display = ['task_delivery',
                     'user',
+                    'is_active',
                     'is_complete',
                     'date_complete',
-                    'hash',
                     'send_first_email',
                     'send_reminders',
                     'send_day_before_deadline',
-                    'send_day_deadline', ]
+                    'send_day_deadline',
+                    'send_last_email',
+                    'hash', ]
     list_filter = ['task_delivery', 'date_add', 'date_complete']
     raw_id_fields = ['user', 'task_delivery', 'mails', ]
+    readonly_fields = ['date_complete', 'hash']
 
 
 MODELS = {

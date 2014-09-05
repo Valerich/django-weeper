@@ -27,8 +27,9 @@ class TaskComplete(View):
     def get(self, request, task_hash, *args, **kwargs):
         try:
             task = Task.objects.get(hash=task_hash)
-            if not task.is_complete:
+            if not task.is_complete and task.is_active:
                 task.is_complete = True
+                task.is_active = False
                 task.date_complete = datetime.datetime.now()
                 task.save()
         except Task.DoesNotExist:
@@ -37,12 +38,14 @@ class TaskComplete(View):
 
 
 class TaskRedirect(RedirectView):
+    permanent = False
 
     def dispatch(self, request, task_hash, *args, **kwargs):
         try:
             self.task = Task.objects.get(hash=task_hash)
-            if self.task.task_delivery.complete_by_redirect and not self.task.is_complete:
+            if self.task.task_delivery.complete_by_redirect and not self.task.is_complete and self.task.is_active:
                 self.task.is_complete = True
+                self.task.is_active = False
                 self.task.date_complete = datetime.datetime.now()
                 self.task.save()
         except Task.DoesNotExist:

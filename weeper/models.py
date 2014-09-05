@@ -37,10 +37,11 @@ class TaskDelivery(models.Model):
     date_add = models.DateTimeField(_('date add'), auto_now_add=True)
     name = models.CharField(_('name'), max_length=255, blank=True, null=True)
     users = models.ManyToManyField(settings.AUTH_USER_MODEL, verbose_name=_('users'))
-    status = models.PositiveSmallIntegerField(_('status'),
-                                              choices=TASK_DELIVERY_STATUSES,
-                                              default=1)
+    status = models.PositiveSmallIntegerField(_('status'), choices=TASK_DELIVERY_STATUSES, default=1)
+
     deadline = models.DateTimeField(_('deadline'))
+    close_tasks_date = models.DateTimeField(_('close tasks date'), blank=True, null=True)
+
     date_send = models.DateTimeField(_('date send'), blank=True, null=True)
     task_url = models.CharField(_('task url'), max_length=200)
     complete_by_redirect = models.BooleanField(_('complete by redirect'), default=False)
@@ -88,6 +89,7 @@ class TaskDelivery(models.Model):
             for user in self.users.all():
                 self.create_task(user)
             self.status = 3
+            self.date_send = datetime.datetime.now()
             self.save()
 
     def check_tasks(self):
@@ -109,7 +111,7 @@ class TaskDelivery(models.Model):
 
     def create_task(self, user, send=True):
         try:
-            task = Task(user=user, task_delivery=self, deadline=self.deadline)
+            task = Task(user=user, task_delivery=self)
             task.save()
             if send:
                 task.send()
@@ -122,17 +124,20 @@ class TaskDelivery(models.Model):
         Закрытие задачи для пользователя.
         """
 
-        self.task_set.filter(user=user).update(is_complete=True)
+        self.task_set.filter(user=user).update(
+            is_complete=True,
+            is_active=False,
+            date_complete=datetime.datetime.now())
 
 
 class Task(models.Model):
     user = models.ForeignKey(get_user_model(), verbose_name=_('user'))
     date_add = models.DateTimeField(_('date add'), auto_now_add=True)
+    is_active = models.BooleanField(_('is active'), default=True)
     is_complete = models.BooleanField(_('is complete'), default=False)
     date_complete = models.DateTimeField(_('complete date'), blank=True, null=True)
     hash = models.CharField(_('hash'), max_length=32, unique=True)
     task_delivery = models.ForeignKey(TaskDelivery, verbose_name=_('task delivery'))
-    deadline = models.DateTimeField(_('deadline'))
 
     first_email_text = models.TextField(_('first email text'))
     reminders_text = models.TextField(_('reminders text'))
@@ -194,7 +199,7 @@ class Task(models.Model):
             try:
                 setattr(self, email_data[2], True)
                 if email_data[2] == 'send_last_email':
-                    self.is_complete = True
+                    self.is_active = False
                 self.save()
             except IndexError:
                 pass
@@ -254,7 +259,7 @@ class Task(models.Model):
         context = Context({
             'username': self.get_username(),
             'email': self.get_email(),
-            'deadline': self.deadline,
+            'deadline': self.task_delivery.deadline,
             'link': u'{}{}'.format(
                 self.task_delivery.task_url,
                 u'?task_key={}'.format(self.hash) if not self.task_delivery.complete_by_redirect else u''),
@@ -277,9 +282,10 @@ class Task(models.Model):
             self.hash = self.generate_hash()
             self.set_email_text()
         date_add = self.date_add if self.date_add else datetime.datetime.now()
-        period = self.deadline - date_add
+        deadline = self.task_delivery.deadline
+        period = deadline - date_add
         if period > datetime.timedelta(days=4):
-            self.reminders_date = self.deadline - datetime.timedelta(days=period.days/2)
+            self.reminders_date = deadline - datetime.timedelta(days=period.days/2)
         else:
             self.reminders_date = None
         super(Task, self).save(*args, **kwargs)

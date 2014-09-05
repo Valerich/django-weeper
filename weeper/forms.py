@@ -15,3 +15,12 @@ class TaskDeliveryAdminForm(forms.ModelForm):
 
     class Meta:
         model = TaskDelivery
+
+    def clean(self):
+        cleaned_data = super(TaskDeliveryAdminForm, self).clean()
+        close_tasks_date = cleaned_data.get('close_tasks_date', None)
+        deadline = cleaned_data.get('deadline', None)
+        if close_tasks_date and deadline:
+            if deadline >= close_tasks_date:
+                raise forms.ValidationError("closing date of the tasks must be greater than the deadline")
+        return cleaned_data
