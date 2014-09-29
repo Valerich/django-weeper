@@ -7,7 +7,7 @@ from setuptools import setup
 
 setup(
     name='django-weeper',
-    version='0.0.7.3',  # also update doc/conf.py:version
+    version='0.0.8.0',  # also update doc/conf.py:version
     packages=[
         'weeper',
         "weeper.management",

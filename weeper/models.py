@@ -16,6 +16,7 @@ from .utils import send_mail
 
 
 email_text_help_text = _("use {{ username }}, {{ email }}, {{ deadline }}, {{ redirect_link }}, {{ link }}, {{ hash }}")
+email_text_help_subject = _("use {{ username }}, {{ deadline }}")
 
 
 TASK_DELIVERY_CREATE_STATUSES = (
@@ -46,21 +47,57 @@ class TaskDelivery(models.Model):
     task_url = models.CharField(_('task url'), max_length=200)
     complete_by_redirect = models.BooleanField(_('complete by redirect'), default=False)
 
+    first_email_subject = models.CharField(
+        _('first email subject'),
+        default=getattr(settings, 'WEEPER_EMAIL_SUBJECT', u'Задача'),
+        max_length=100,
+        help_text=email_text_help_subject
+    )
     first_email_text = models.TextField(
         _('first email text'),
         help_text=email_text_help_text)
+    reminders_subject = models.CharField(
+        _('reminders subject'),
+        default=getattr(settings, 'WEEPER_REMINDER_EMAIL_SUBJECT', u'Напоминание'),
+        max_length=100,
+        help_text=email_text_help_subject
+    )
     reminders_text = models.TextField(
         _('reminders text'), blank=True, null=True,
         help_text=email_text_help_text)
+    day_before_deadline_subject = models.CharField(
+        _('day before deadline subject'),
+        default=getattr(settings, 'WEEPER_DAY_BEFORE_DEADLINE_EMAIL_SUBJECT', u'Напоминание'),
+        max_length=100,
+        help_text=email_text_help_subject
+    )
     day_before_deadline_text = models.TextField(
         _('day before deadline text'), blank=True, null=True,
         help_text=email_text_help_text)
+    day_deadline_subject = models.CharField(
+        _('day deadline subject'),
+        default=getattr(settings, 'WEEPER_DAY_DEADLINE_EMAIL_SUBJECT', u'Напоминание'),
+        max_length=100,
+        help_text=email_text_help_subject
+    )
     day_deadline_text = models.TextField(
         _('day deadline text'), blank=True, null=True,
         help_text=email_text_help_text)
+    after_deadline_subject = models.CharField(
+        _('after deadline subject'),
+        default=getattr(settings, 'WEEPER_AFTER_DEADLINE_EMAIL_SUBJECT', u'Напоминание'),
+        max_length=100,
+        help_text=email_text_help_subject
+    )
     after_deadline_text = models.TextField(
         _('after deadline text'), blank=True, null=True,
         help_text=email_text_help_text)
+    last_email_subject = models.CharField(
+        _('last email subject'),
+        default=getattr(settings, 'WEEPER_LAST_EMAIL_SUBJECT', u'Задача не выполнена'),
+        max_length=100,
+        help_text=email_text_help_subject
+    )
     last_email_text = models.TextField(
         _('last email text'), blank=True, null=True,
         help_text=email_text_help_text)
@@ -139,11 +176,17 @@ class Task(models.Model):
     hash = models.CharField(_('hash'), max_length=32, unique=True)
     task_delivery = models.ForeignKey(TaskDelivery, verbose_name=_('task delivery'))
 
+    first_email_subject = models.CharField(_('first email subject'), max_length=100,)
     first_email_text = models.TextField(_('first email text'))
+    reminders_subject = models.CharField(_('reminders subject'), max_length=100,)
     reminders_text = models.TextField(_('reminders text'))
+    day_before_deadline_subject = models.CharField(_('day before deadline subject'), max_length=100,)
     day_before_deadline_text = models.TextField(_('day before deadline text'))
+    day_deadline_subject = models.CharField(_('day deadline subject'), max_length=100,)
     day_deadline_text = models.TextField(_('day deadline text'))
+    after_deadline_subject = models.CharField(_('after deadline subject'), max_length=100,)
     after_deadline_text = models.TextField(_('after deadline text'))
+    last_email_subject = models.CharField(_('last email subject'), max_length=100,)
     last_email_text = models.TextField(_('last email text'))
 
     mails = models.ManyToManyField(Message, verbose_name=_('mails'), blank=True, null=True)
@@ -163,26 +206,26 @@ class Task(models.Model):
     def send(self, email_type='first'):
         types = {
             'first': (
-                getattr(settings, 'WEEPER_EMAIL_SUBJECT', u'Задача'),
+                self.first_email_subject,
                 self.first_email_text,
                 'send_first_email'),
             'reminder': (
-                getattr(settings, 'WEEPER_REMINDER_EMAIL_SUBJECT', u'Напоминание'),
+                self.reminders_subject,
                 self.reminders_text,
                 'send_reminders'),
             'day_before_deadline': (
-                getattr(settings, 'WEEPER_DAY_BEFORE_DEADLINE_EMAIL_SUBJECT', u'Напоминание'),
+                self.day_before_deadline_subject,
                 self.day_before_deadline_text,
                 'send_day_before_deadline'),
             'day_deadline': (
-                getattr(settings, 'WEEPER_DAY_DEADLINE_EMAIL_SUBJECT', u'Напоминание'),
+                self.day_deadline_subject,
                 self.day_deadline_text,
                 'send_day_deadline'),
             'after_deadline': (
-                getattr(settings, 'WEEPER_AFTER_DEADLINE_EMAIL_SUBJECT', u'Напоминание'),
+                self.after_deadline_subject,
                 self.after_deadline_text),
             'last': (
-                getattr(settings, 'WEEPER_LAST_EMAIL_SUBJECT', u'Задача не выполнена'),
+                self.last_email_subject,
                 self.last_email_text,
                 'send_last_email'),
         }
@@ -277,10 +320,33 @@ class Task(models.Model):
                 if etf == 'first_email_text':
                     first_email_text = email_text
 
+    def set_subject_text(self):
+        etfs = ('first_email_subject',
+                'reminders_subject',
+                'day_before_deadline_subject',
+                'day_deadline_subject',
+                'after_deadline_subject',
+                'last_email_subject')
+        context = Context({
+            'username': self.get_username(),
+            'deadline': self.task_delivery.deadline,})
+        first_email_subject = None
+        for etf in etfs:
+            s = getattr(self.task_delivery, etf, None)
+            if not s:
+                setattr(self, etf, first_email_subject)
+            else:
+                template = Template(s)
+                subject_text = template.render(context)
+                setattr(self, etf, subject_text)
+                if etf == 'first_email_subject':
+                    first_email_subject = subject_text
+
     def save(self, *args, **kwargs):
         if not self.id:
             self.hash = self.generate_hash()
             self.set_email_text()
+            self.set_subject_text()
         date_add = self.date_add if self.date_add else datetime.datetime.now()
         deadline = self.task_delivery.deadline
         period = deadline - date_add

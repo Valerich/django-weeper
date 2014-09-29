@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-09-05 15:55+0400\n"
+"POT-Creation-Date: 2014-09-29 13:28+0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -26,159 +26,187 @@ msgstr ""
 "Используйте {{ username }}, {{ email }}, {{ deadline }}, "
 "{{ redirect_link }}, {{ link }}, {{ hash }}"
 
-#: models.py:22
+#: models.py:19
+msgid "use {{ username }}, {{ deadline }}"
+msgstr "Используйте {{ username }}, {{ deadline }}"
+
+#: models.py:23
 msgid "new"
 msgstr "новый"
 
-#: models.py:23
+#: models.py:24
 msgid "ready for distribution"
 msgstr "готов к рассылке"
 
-#: models.py:27
+#: models.py:28
 msgid "sent"
 msgstr "разослан"
 
-#: models.py:28
+#: models.py:29
 msgid "closed"
 msgstr "закрыт"
 
-#: models.py:32
+#: models.py:33
 msgid "lock"
 msgstr "Заблокирован"
 
-#: models.py:37 models.py:135
+#: models.py:38 models.py:172
 msgid "date add"
 msgstr "дата добавления"
 
-#: models.py:38
+#: models.py:39
 msgid "name"
 msgstr "название"
 
-#: models.py:39
+#: models.py:40
 msgid "users"
 msgstr "пользователи"
 
-#: models.py:40
+#: models.py:41
 msgid "status"
 msgstr "статус"
 
-#: models.py:42
+#: models.py:43
 msgid "deadline"
 msgstr "дедлайн"
 
-#: models.py:43
+#: models.py:44
 msgid "close tasks date"
 msgstr "дата прекращения рассылки"
 
-#: models.py:45
+#: models.py:46
 msgid "date send"
 msgstr "дата отправки"
 
-#: models.py:46
+#: models.py:47
 msgid "task url"
 msgstr "url задачи"
 
-#: models.py:47
+#: models.py:48
 msgid "complete by redirect"
 msgstr "Закрывать при редиректе"
 
-#: models.py:50 models.py:142
+#: models.py:51 models.py:179
+msgid "first email subject"
+msgstr "Заголовок первой рассылки"
+
+#: models.py:57 models.py:180
 msgid "first email text"
 msgstr "текст первой рассылки"
 
-#: models.py:53 models.py:143
+#: models.py:60 models.py:181
+msgid "reminders subject"
+msgstr "Заголовок напоминания"
+
+#: models.py:66 models.py:182
 msgid "reminders text"
 msgstr "текст напоминания"
 
-#: models.py:56 models.py:144
+#: models.py:69 models.py:183
+msgid "day before deadline subject"
+msgstr "Заголовок напоминания за день до дедлайна"
+
+#: models.py:75 models.py:184
 msgid "day before deadline text"
 msgstr "текст напоминания за день до дедлайна"
 
-#: models.py:59 models.py:145
+#: models.py:78 models.py:185
+msgid "day deadline subject"
+msgstr "Заголовок напоминания в день дедлайна"
+
+#: models.py:84 models.py:186
 msgid "day deadline text"
 msgstr "текст напоминания в день дедлайна"
 
-#: models.py:62 models.py:146
+#: models.py:87 models.py:187
+msgid "after deadline subject"
+msgstr "Заголовок напоминания после дедлайна"
+
+#: models.py:93 models.py:188
 msgid "after deadline text"
 msgstr "текст напоминания после дедлайна"
 
-#: models.py:65 models.py:147
+#: models.py:96 models.py:189
+msgid "last email subject"
+msgstr "Заголовок последней рассылки"
+
+#: models.py:102 models.py:190
 msgid "last email text"
 msgstr "текст последней рассылки"
 
-#: models.py:69
+#: models.py:106
 msgid "TaskDelivery"
 msgstr "Рассылка"
 
-#: models.py:70
+#: models.py:107
 msgid "TaskDeliverys"
 msgstr "Рассылки"
 
-#: models.py:79 templates/admin/weeper/taskdelivery/change_form.html:10
+#: models.py:116 templates/admin/weeper/taskdelivery/change_form.html:10
 msgid "Send"
 msgstr "Разослать"
 
-#: models.py:82
+#: models.py:119
 msgid "Actions"
 msgstr "Действия"
 
-#: models.py:134
+#: models.py:171
 msgid "user"
 msgstr "пользователь"
 
-#: models.py:136
+#: models.py:173
 msgid "is active"
 msgstr "активен"
 
-#: models.py:137
+#: models.py:174
 msgid "is complete"
 msgstr "выполнена"
 
-#: models.py:138
+#: models.py:175
 msgid "complete date"
 msgstr "дата выполнения"
 
-#: models.py:139
+#: models.py:176
 msgid "hash"
 msgstr ""
 
-#: models.py:140
+#: models.py:177
 msgid "task delivery"
 msgstr "рассылка"
 
-#: models.py:149
+#: models.py:192
 msgid "mails"
 msgstr "сообщения"
 
-#: models.py:150
+#: models.py:193
 msgid "reminders_date"
 msgstr "дата напоминания"
 
-#: models.py:152
+#: models.py:195
 msgid "send first email"
 msgstr "первое письмо отправлено"
 
-#: models.py:153
+#: models.py:196
 msgid "send reminders"
 msgstr "напоминание отправлено"
 
-#: models.py:154
+#: models.py:197
 msgid "send day before deadline"
 msgstr "напоминание за день до дедлайна отправлено"
 
-#: models.py:155
+#: models.py:198
 msgid "send day deadline"
 msgstr "напоминание в день дедлайна отправлено"
 
-#: models.py:156
+#: models.py:199
 msgid "send last email"
 msgstr "последнее письмо отправлено"
 
-#: models.py:159
+#: models.py:202
 msgid "Task"
 msgstr "Задача"
 
-#: models.py:160
+#: models.py:203
 msgid "Tasks"
 msgstr "Задачи"
 
